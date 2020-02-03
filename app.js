@@ -16,32 +16,57 @@ app.use(logger('dev'));
 app.use(jsonParser({ limit: "10mb" }));
 
 // cors middleware implementation
-app.use(cors());
+app.use(cors({origin: '*'}));
 
 // compression middleware implementation
 app.use(compression());
 
 
-const file = "./log.json";
+const file = "log.json";
+const appsFile = "./apps.json";
 
-function log(data) {
-    let fData;
+function readFile(file) {
+    let data;
 
     try {
-        fData = JSON.parse(fs.readFileSync(file, "utf8"));
+        data = JSON.parse(fs.readFileSync(file, "utf8"));
     } catch (e) {
-        fData = [];
+        data = [];
     }
+
+    return data;
+}
+
+function createApp(data) {
+    const fData = readFile(appsFile);
+    fData.push(Object.assign({}, data, {createdAt: new Date()}));
+    fs.writeFileSync(appsFile, JSON.stringify(fData));
+}
+
+function editApp(data, id) {
+    let fData = readFile(appsFile);
+    fData = fData.map(value => (value.id === id) ? data : value);
+    fs.writeFileSync(appsFile, JSON.stringify(fData));
+}
+
+function deleteApp(id) {
+    let fData = readFile(appsFile);
+    fData = fData.filter(value => value.id !== id);
+    fs.writeFileSync(appsFile, JSON.stringify(fData));
+}
+
+function log(data, id) {
+    let fData = readFile(`./${id}_${file}`);
 
     if (fData.length >= 80000) { // 12 hours
         fData.splice(0, 7000); // 1hour
     }
 
     fData.push(Object.assign({}, data, {createdAt: new Date()}));
-    fs.writeFileSync(file, JSON.stringify(fData));
+    fs.writeFileSync(`./${id}_${file}`, JSON.stringify(fData));
 }
 
-function loadData() {
+function loadData(id) {
     let x = 0;
     const data = [];
 
@@ -54,24 +79,75 @@ function loadData() {
         x++;
     }
 
-    fs.writeFileSync(file, JSON.stringify(data));
-}   
-    
-function getLogs() {
-    try {
-        return JSON.parse(fs.readFileSync(file, "utf8"));
-    } catch (e) {
-        return [];
-    }
+    fs.writeFileSync(`./${id}_${file}`, JSON.stringify(data));
 }
 
-function deleteLogs() {
-    fs.writeFileSync(file, JSON.stringify([]));
+function getLogs(id) {
+    return readFile(`./${id}_${file}`);
 }
+
+function getApps() {
+    return readFile(appsFile);
+}
+
+function deleteLogs(id) {
+    fs.writeFileSync(`./${id}_${file}`, JSON.stringify([]));
+}
+
+// Create App.
+app.post('/create', (req, res) => {
+    createApp(req.body);
+    res.json({
+        success: true,
+        status: 'OK',
+    });
+});
+
+// Fetch apps.
+app.get('/apps', (req, res) => {
+    res.json({
+        success: true,
+        status: 'OK',
+        data: getApps(),
+    });
+});
+
+// Fetch apps.
+app.get('/apps/:id', (req, res) => {
+    const id = req.params.id;
+    const data = getApps().filter(val => val.id === id)[0];
+    res.json({
+        success: true,
+        status: 'OK',
+        data: data || null,
+    });
+});
+
+// Edit apps.
+app.put('/apps/:id', (req, res) => {
+    const id = req.params.id;
+    editApp(req.body, id);
+    res.json({
+        success: true,
+        status: 'OK',
+        data: req.body,
+    });
+});
+
+// Delete apps.
+app.delete('/apps/:id', (req, res) => {
+    const id = req.params.id;
+    deleteApp(id);
+    res.json({
+        success: true,
+        status: 'OK',
+    });
+});
 
 // Post data.
-app.post('/post', (req, res) => {
-    log(req.body);
+app.post('/post/:id', (req, res) => {
+    const id = req.params.id;
+    log(req.body, id);
     res.json({
         success: true,
         status: 'OK',
@@ -79,17 +155,29 @@ app.post('/post', (req, res) => {
 });
 
 // Fetch data.
-app.get('/get', (req, res) => {
+app.get('/get/:id', (req, res) => {
+    const id = req.params.id;
     res.json({
         success: true,
         status: 'OK',
-        data: getLogs(),
+        data: getLogs(id),
+    });
+});
+
+// Delete data
+app.delete('/delete/:id', (req, res) => {
+    const id = req.params.id;
+    deleteLogs(id);
+    res.json({
+        success: true,
+        status: 'OK',
     });
 });
 
 // Fetch live data
-app.get('/get/live', (req, res) => {
-    const logs = getLogs();
+app.get('/get/live/:id', (req, res) => {
+    const id = req.params.id;
+    const logs = getLogs(id);
     res.json({
         success: true,
         status: 'OK',
@@ -97,34 +185,27 @@ app.get('/get/live', (req, res) => {
     });
 });
 
+app.put('/load/test/:id', (req, res) => {
+    const id = req.params.id;
+    deleteLogs(id);
+    loadData(id);
+    res.json({
+        success: true,
+        status: 'OK',
+        data: getLogs(id),
+    });
+});
+
 // Fetch data with limit
-app.get('/get/:limit', (req, res) => {
+app.get('/get/:id/:limit', (req, res) => {
+    const id = req.params.id;
     const limit = req.params.limit;
-    const logs = getLogs();
+    const logs = getLogs(id);
     logs.splice(0, logs.length - limit);
     res.json({
         success: true,
         status: 'OK',
         data: logs,
-    });
-});
-
-// Delete data
-app.delete('/delete', (req, res) => {
-    deleteLogs();
-    res.json({
-        success: true,
-        status: 'OK',
-    });
-});
-
-app.put('/load/test', (req, res) => {
-    deleteLogs();
-    loadData();
-    res.json({
-        success: true,
-        status: 'OK',
-        data: getLogs(),
     });
 });
 
