@@ -185,6 +185,7 @@ app.get('/get/live/:id', (req, res) => {
     });
 });
 
+// Load sample data
 app.put('/load/test/:id', (req, res) => {
     const id = req.params.id;
     deleteLogs(id);
