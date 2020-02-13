@@ -1,3 +1,4 @@
+"use strict";
 const app = require('express')();
 const cors = require('cors');
 const helmet = require('helmet');
@@ -5,6 +6,9 @@ const logger = require('morgan');
 const compression = require('compression');
 const jsonParser = require('body-parser').json;
 const fs = require('fs');
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+const {startSocket, poultryRouter} = require('./poultry');
 
 // helmet middleware implementation
 app.use(helmet());
@@ -24,6 +28,8 @@ app.use(compression());
 
 const file = "log.json";
 const appsFile = "./apps.json";
+
+startSocket(io);
 
 function readFile(file) {
     let data;
@@ -111,6 +117,9 @@ app.get('/apps', (req, res) => {
         data: getApps(),
     });
 });
+
+// Poultry Router
+app.use('/poultry', poultryRouter);
 
 // Fetch apps.
 app.get('/apps/:id', (req, res) => {
@@ -224,6 +233,6 @@ app.use((req, res, next) => {
 const port = process.env.PORT || 5000;
 
 // server listener.
-app.listen(port, () => {
+server.listen(port, () => {
     console.log('Server Listening On:', port);
 });
