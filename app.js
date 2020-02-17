@@ -9,6 +9,7 @@ const fs = require('fs');
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const {startSocket, poultryRouter} = require('./poultry');
+const {startPowerSocket, powerRouter} = require('./power');
 
 // helmet middleware implementation
 app.use(helmet());
@@ -25,11 +26,11 @@ app.use(cors({origin: '*'}));
 // compression middleware implementation
 app.use(compression());
 
-
 const file = "log.json";
 const appsFile = "./apps.json";
 
 startSocket(io);
+startPowerSocket(io);
 
 function readFile(file) {
     let data;
@@ -120,6 +121,9 @@ app.get('/apps', (req, res) => {
 
 // Poultry Router
 app.use('/poultry', poultryRouter);
+
+// Power Router
+app.use('/power', powerRouter);
 
 // Fetch apps.
 app.get('/apps/:id', (req, res) => {
