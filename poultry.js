@@ -47,7 +47,9 @@ poultryRouter.get('/', (req, res) => {
 
 poultryRouter.post('/change-mode', (req, res) => {
     const data = req.body;
-    socket.emit('change-mode', data);
+    if (socket) {
+        socket.emit('change-mode', data);
+    }
     res.json({
         status: true,
         message: 'OK',
@@ -56,7 +58,9 @@ poultryRouter.post('/change-mode', (req, res) => {
 
 poultryRouter.post('/toggle-heater', (req, res) => {
     const data = req.body;
-    socket.emit('toggle-heater', data);
+    if (socket) {
+        socket.emit('toggle-heater', data);
+    }
     res.json({
         status: true,
         message: 'OK',
@@ -65,7 +69,9 @@ poultryRouter.post('/toggle-heater', (req, res) => {
 
 poultryRouter.post('/toggle-cooler', (req, res) => {
     const data = req.body;
-    socket.emit('toggle-cooler', data);
+    if (socket) {
+        socket.emit('toggle-cooler', data);
+    }
     res.json({
         status: true,
         message: 'OK',
@@ -74,7 +80,9 @@ poultryRouter.post('/toggle-cooler', (req, res) => {
 
 poultryRouter.post('/set-params', (req, res) => {
     const data = req.body;
-    socket.emit('set-params', data);
+    if (socket) {
+        socket.emit('set-params', data);
+    }
     res.json({
         status: true,
         message: 'OK',

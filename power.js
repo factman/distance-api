@@ -47,7 +47,7 @@ powerRouter.get('/', (req, res) => {
 
 powerRouter.post('/power', (req, res) => {
     const data = req.body;
-    if (data.power) {
+    if (socket && data.power) {
         socket.emit('power-on', null);
     } else {
         socket.emit('power-off', null);
@@ -60,7 +60,9 @@ powerRouter.post('/power', (req, res) => {
 
 powerRouter.post('/set-offset', (req, res) => {
     const data = req.body;
-    socket.emit('set-offset', data);
+    if (socket) {
+        socket.emit('set-offset', data);
+    }
     res.json({
         status: true,
         message: 'OK',
