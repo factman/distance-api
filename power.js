@@ -45,12 +45,14 @@ powerRouter.get('/', (req, res) => {
     });
 });
 
-powerRouter.post('/power', (req, res) => {
+powerRouter.post('/power-toggle', (req, res) => {
     const data = req.body;
-    if (socket && data.power) {
-        socket.emit('power-on', null);
-    } else {
-        socket.emit('power-off', null);
+    if (socket) {
+        if (data.power) {
+            socket.emit('power-on', null);
+        } else {
+            socket.emit('power-off', null);
+        }
     }
     res.json({
         status: true,
@@ -58,10 +60,10 @@ powerRouter.post('/power', (req, res) => {
     });
 });
 
-powerRouter.post('/set-offset', (req, res) => {
+powerRouter.post('/power-offset', (req, res) => {
     const data = req.body;
     if (socket) {
-        socket.emit('set-offset', data);
+        socket.emit('power-offset', data);
     }
     res.json({
         status: true,
