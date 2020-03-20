@@ -10,6 +10,7 @@ const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const {startSocket, poultryRouter} = require('./poultry');
 const {startPowerSocket, powerRouter} = require('./power');
+const {startInverterSocket, inverterRouter} = require('./inverter');
 
 // helmet middleware implementation
 app.use(helmet());
@@ -31,6 +32,7 @@ const appsFile = "./apps.json";
 
 startSocket(io);
 startPowerSocket(io);
+startInverterSocket(io);
 
 function readFile(file) {
     let data;
@@ -124,6 +126,9 @@ app.use('/poultry', poultryRouter);
 
 // Power Router
 app.use('/power', powerRouter);
+
+// Inverter Router
+app.use('/inverter', inverterRouter);
 
 // Fetch apps.
 app.get('/apps/:id', (req, res) => {
