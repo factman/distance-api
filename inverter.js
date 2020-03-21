@@ -45,7 +45,7 @@ inverterRouter.get('/', (req, res) => {
 
 inverterRouter.post('/power-toggle', (req, res) => {
     if (socket) {
-        if (req.body) {
+        if (req.body.power) {
             socket.emit('power-on', null);
         } else {
             socket.emit('power-off', null);
@@ -59,7 +59,7 @@ inverterRouter.post('/power-toggle', (req, res) => {
 
 inverterRouter.post('/port1-toggle', (req, res) => {
     if (socket) {
-        if (req.body) {
+        if (req.body.power) {
             socket.emit('port1-on', null);
         } else {
             socket.emit('port1-off', null);
@@ -73,7 +73,7 @@ inverterRouter.post('/port1-toggle', (req, res) => {
 
 inverterRouter.post('/port2-toggle', (req, res) => {
     if (socket) {
-        if (req.body) {
+        if (req.body.power) {
             socket.emit('port2-on', null);
         } else {
             socket.emit('port2-off', null);
