@@ -11,6 +11,7 @@ const io = require('socket.io')(server);
 const {startSocket, poultryRouter} = require('./poultry');
 const {startPowerSocket, powerRouter} = require('./power');
 const {startInverterSocket, inverterRouter} = require('./inverter');
+const {solarRouter} = require('./solar');
 
 // helmet middleware implementation
 app.use(helmet());
@@ -129,6 +130,9 @@ app.use('/power', powerRouter);
 
 // Inverter Router
 app.use('/inverter', inverterRouter);
+
+// Solar Router
+app.use('/solar', solarRouter);
 
 // Fetch apps.
 app.get('/apps/:id', (req, res) => {
